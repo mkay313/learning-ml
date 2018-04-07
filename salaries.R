@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(Amelia)
+library(caTools)
 
 adult <- read.csv("adult_sal.csv")
 adult <- adult %>%
@@ -113,3 +114,22 @@ regions_with_income +
   geom_bar(aes(fill=factor(income)), alpha = 0.5, color = "black") +
   coord_flip() +
   theme_bw()
+
+# it's the final countdown
+split <- sample.split(adult$income, SplitRatio = 0.7)
+adult_train <- subset(adult, split == TRUE)
+adult_test <- subset(adult, split == FALSE)
+log_model <- glm(formula = income ~ ., family = binomial(link = 'logit'), data = adult_train)
+print(summary(log_model))
+
+# that's a lot of factors, let's try to remove the least influential ones
+step_log_model <- step(log_model)
+print(summary(step_log_model))
+# looks like everything stays ¯\_(ツ)_/¯
+# let's get a confusion matrix, then
+fitted_probabilities <- predict(step_log_model, adult_test, type = "response")
+fitted_results <- ifelse(fitted_probabilities > 0.5, 1, 0)
+print(table(adult_test$income, fitted_probabilities > 0.5))
+print(paste(c("accuracy: "), (6372+1423)/(6372+1423+548+872)), collapse = "")
+print(paste(c("recall: "), 6732/(6372+548)), collapse = "")
+print(paste(c("precision: "), 6732/(6372+872)), collapse = "")
