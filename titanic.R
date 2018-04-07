@@ -1,4 +1,4 @@
-# dataset: 
+# dataset: https://www.kaggle.com/c/titanic/data renamed to titanic_train and titanic_test respectively
 
 library(Amelia)
 library(tidyverse)
@@ -87,6 +87,8 @@ log_model <- glm(Survived ~ ., family = binomial(link = "logit"),
 print(summary(log_model))
 
 # first check the model fit
+# setting a stable seed so the values don't change
+set.seed(95)
 split <- sample.split(df_train$Survived, SplitRatio = 0.7)
 final_train <- subset(df_train, split == TRUE)
 final_test <- subset(df_train, split == FALSE)
@@ -97,15 +99,16 @@ fitted_results <- ifelse(fitted_probabilities > 0.5, 1, 0)
 summary(fitted_results)
 misClassError <- mean(fitted_results != final_test$Survived)
 print(table(final_test$Survived, fitted_probabilities > 0.5))
+print(paste(c("model fit: "), 1 - misClassError), collapse = "")
 
-# df_test$Pclass <- factor(df_test$Pclass)
-# df_test$SibSp <- factor(df_test$SibSp)
-# 
-# # there are 2 people with 9 Parch in test which leaves us with more factors than needed
-# # lets replace those 9s with 6s
-# df_test$Parch[df_test$Parch==9] <- 6
-# df_test$Parch <- factor(df_test$Parch)
-# 
-# fitted_probabilities <- predict(log_model, df_test, type = 'response')
-# fitted_results <- ifelse(fitted_probabilities > 0.5, 1, 0)
-# print(summary(fitted_results))
+df_test$Pclass <- factor(df_test$Pclass)
+df_test$SibSp <- factor(df_test$SibSp)
+
+# there are 2 people with 9 Parch in test which leaves us with more factors than needed
+# lets replace those 9s with 6s
+df_test$Parch[df_test$Parch==9] <- 6
+df_test$Parch <- factor(df_test$Parch)
+
+fitted_probabilities <- predict(log_model, df_test, type = 'response')
+fitted_results <- ifelse(fitted_probabilities > 0.5, 1, 0)
+print(summary(fitted_results))
