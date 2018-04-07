@@ -1,6 +1,6 @@
 # data: https://archive.ics.uci.edu/ml/datasets/adult
 
-library(dplyr)
+library(tidyverse)
 library(Amelia)
 
 adult <- read.csv("adult_sal.csv")
@@ -64,4 +64,42 @@ print(table(adult$country))
 
 # some workspace cleanup
 rm(c_n_am, c_other, c_s_am, c_asia, c_europe, cont, count, emp_end_st, emp_entry_st, i, j, mar_end_st, mar_entry_st)
+
+# turn '?' into NA values and remove ? from factors
+adult[adult == '?'] <- NA
+print(summary(adult))
+adult$type_employer <- factor(as.character(adult$type_employer))
+adult$occupation <- factor(as.character(adult$occupation))
+print(summary(adult))
+
+missmap(adult,y.at=c(1),y.labels = c(''),col=c('yellow','black'), legend = FALSE)
+
+# there are 1843 NA occupations (sum(is.na(adult$occupation))) and  1863 NA employer types
+# let's see if these coincide
+v <- apply(adult, MARGIN = 1, function(x) sum(is.na(x)))
+print(length(v[v==2]))
+# this means 1863 of them coincide
+# let's only filter these out for a moment and see if they have something in common
+adult_na <- adult %>%
+  filter(is.na(type_employer)) %>%
+  filter(is.na(occupation))
+
+ggplot(data = adult_na, aes(age)) + 
+  geom_bar(aes(fill = income), alpha = 0.5) + 
+  theme_bw()
+# by the look of things, the majority of NAs is either young (<25), or retirement age
+# how many of them exactly are in the higher income group?
+
+income_na <- adult_na %>%
+  group_by(income) %>%
+  count()
+income_all <- adult %>%
+  group_by(income) %>%
+  count()
+print(income_na$n[2]/income_all$n[2])
+
+# only >2.5% of all higher income folk fall into the NAs so it seems safe, and NAs are ~6% of all folk so let's drop them
+adult <- na.omit(adult)
+
+
 
