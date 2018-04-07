@@ -61,6 +61,7 @@ for (i in 1:5) {
 }
 adult$country <- factor(adult$country)
 print(table(adult$country))
+names(adult)[names(adult) == "country"] <- "region"
 
 # some workspace cleanup
 rm(c_n_am, c_other, c_s_am, c_asia, c_europe, cont, count, emp_end_st, emp_entry_st, i, j, mar_end_st, mar_entry_st)
@@ -101,5 +102,14 @@ print(income_na$n[2]/income_all$n[2])
 # only >2.5% of all higher income folk fall into the NAs so it seems safe, and NAs are ~6% of all folk so let's drop them
 adult <- na.omit(adult)
 
+# ages colored by income again
+ages_with_income <- ggplot(data = adult, aes(age))
+ages_with_income +
+  geom_histogram(aes(fill = factor(income)), alpha = 0.5, bins = 35, color = "black") +
+  theme_bw()
 
-
+regions_with_income <- ggplot(data = adult, aes(region))
+regions_with_income +
+  geom_bar(aes(fill=factor(income)), alpha = 0.5, color = "black") +
+  coord_flip() +
+  theme_bw()
