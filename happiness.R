@@ -1,5 +1,4 @@
 library(tidyverse)
-library(Amelia)
 
 # data source: https://www.kaggle.com/unsdsn/world-happiness
 
@@ -21,8 +20,7 @@ h_2017 <- h_2017 %>%
   select(-c(Whisker.high, Whisker.low))
 
 # 2017 is missing the regions -- lets add them
-regions <- h_2015[match(h_2017$Country, h_2015$Country), "Region"]
-h_2017$Region <- regions
+h_2017$Region <- h_2015[match(h_2017$Country, h_2015$Country), "Region"]
 
 # there are some NAs, lets address that
 print(is.na(h_2017$Region))
