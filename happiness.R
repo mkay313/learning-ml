@@ -70,7 +70,8 @@ ggplot(data = h_2015, aes(x = Happiness.Score,
             alpha = 0.7,
             check_overlap = TRUE) +
   geom_point(data = mean_hap_gdp, aes(colour = Region, size = Country), show.legend = FALSE) +
-  theme_few()
+  theme_few() +
+  theme(legend.title = element_blank())
 
 # that's kinda depressing. How about life expectancy and health?
 mean_hap_health <- h_2015 %>%
@@ -91,5 +92,6 @@ ggplot(data = h_2015, aes(x = Happiness.Score,
             angle = 30,
             alpha = 0.7,
             check_overlap = TRUE) +
-  geom_point(data = mean_hap_health, aes(colour = Region, size = Country), show.legend = FALSE)
-  theme_few()
+  geom_point(data = mean_hap_health, aes(colour = Region, size = Country), show.legend = FALSE) +
+  theme_few() + 
+  theme(legend.title = element_blank())
