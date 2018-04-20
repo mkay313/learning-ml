@@ -51,7 +51,6 @@ missmap(h_2015, main = "Missing data for 2015", col = c('red', 'black'), legend 
 hap <- rbind(h_2015, h_2016, h_2017)
 
 # let's see how GDP per capita works with happiness scores
-
 mean_hap_gdp <- h_2015 %>%
   group_by(Region) %>%
   summarise(Happiness.Score = mean(Happiness.Score),
