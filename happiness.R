@@ -51,11 +51,18 @@ missmap(h_2015, main = "Missing data for 2015", col = c('red', 'black'), legend 
 hap <- rbind(h_2015, h_2016, h_2017)
 
 # let's see how GDP per capita works with happiness scores
+
+mean_hap_gdp <- h_2015 %>%
+  group_by(Region) %>%
+  summarise(Happiness.Score = mean(Happiness.Score),
+            Economy..GDP.per.Capita. = mean(Economy..GDP.per.Capita.),
+            Country = n())
+
 ggplot(data = h_2015, aes(x = Happiness.Score, 
                           y = Economy..GDP.per.Capita.,
                           label = Country)) +
   geom_smooth(method = "lm") +
-  labs(title = "Higher GDP per capita walks hand in hand with higher happiness scores",
+  labs(title = "Higher GDP per capita walks hand in hand with higher happiness scores. Dots = mean regional scores",
       y = "GDP per capita",
       x = "Happiness score") +
   geom_text(aes(colour = factor(Region)),
@@ -63,20 +70,27 @@ ggplot(data = h_2015, aes(x = Happiness.Score,
             angle = 30,
             alpha = 0.7,
             check_overlap = TRUE) +
+  geom_point(data = mean_hap_gdp, aes(colour = Region, size = Country), show.legend = FALSE) +
   theme_few()
 
-mean_hap_gdp <- h_2015 %>%
+# that's kinda depressing. How about life expectancy and health?
+mean_hap_health <- h_2015 %>%
   group_by(Region) %>%
   summarise(Happiness.Score = mean(Happiness.Score),
-            Economy..GDP.per.Capita. = mean(Economy..GDP.per.Capita.))
+            Health..Life.Expectancy. = mean(Health..Life.Expectancy.),
+            Country = n())
 
-ggplot(data = mean_hap_gdp, aes(x = Happiness.Score, y = Economy..GDP.per.Capita., label = Region)) + 
-  labs(title = "Mean Happiness scores vs mean GDP per capita in world regions",
-       y = "Mean GDP per capita",
-       x = "Mean happiness score") +
-  geom_text(size = 2.5,
-            angle = 30) +
+ggplot(data = h_2015, aes(x = Happiness.Score, 
+                          y = Health..Life.Expectancy.,
+                          label = Country)) +
+  geom_smooth(method = "lm") +
+  labs(title = "Fitter = happier = more productive? Dots = mean regional scores",
+       y = "Health & Life expectancy score",
+       x = "Happiness score") +
+  geom_text(aes(colour = factor(Region)),
+            size = 3,
+            angle = 30,
+            alpha = 0.7,
+            check_overlap = TRUE) +
+  geom_point(data = mean_hap_health, aes(colour = Region, size = Country), show.legend = FALSE)
   theme_few()
-
-# that's kinda depressing. How about life expectancy
-ggplot
