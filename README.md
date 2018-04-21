@@ -17,4 +17,4 @@ creating a k-nearest neighbours model off the Caravan insurance dataset availabl
 creating a k-nearest neighbours model off the iris flowers dataset with the goal of predicting the flower species
 
 ### happiness
-exploratory data analysis and practicing plotting off the [World Happiness Report dataset](https://www.kaggle.com/unsdsn/world-happiness)
+exploratory data analysis and practicing plotting off the [World Happiness Report dataset](https://www.kaggle.com/unsdsn/world-happiness) with the goal of, well, practicing generating nice plots :)
