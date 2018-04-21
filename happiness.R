@@ -107,13 +107,31 @@ ggplot(data = mean_world_changes, aes(x = year, y = Happiness.Score, label = Hap
   scale_y_continuous(limits = c(0, 6)) +
   geom_text(nudge_y = 0.2) +
   theme_few() +
-  labs(title = "The world is getting sadder :(",
+  labs(title = "The world is getting less happy :(",
        x = "",
        y = "Mean happiness score")
+
+mean_region_changes <- hap %>%
+  group_by(year, Region) %>%
+  summarise(Happiness.Score = mean(Happiness.Score),
+            Happiness.Label = round(Happiness.Score, 3))
+
+ggplot(data = mean_region_changes, aes(x = Region, y = Happiness.Score)) +
+  geom_bar(stat = "identity", aes(fill = factor(Region))) +
+  facet_grid(year ~ .) +
+  scale_y_continuous(limits = c(0, 8)) +
+  theme_few() +
+  labs(title = "Happiness scores per region across 2015-2017",
+       x = "",
+       y = "Mean happiness score") +
+  coord_flip() +
+  theme(legend.title = element_blank())
 
 mean_country_changes <- hap %>%
   group_by(Country) %>%
   summarise(Happiness.Score.Diff = sum(diff(Happiness.Score)),
             Happiness.Score.Improved = ifelse(Happiness.Score.Diff > 0, 1, 0),
             Happiness.Score = mean(Happiness.Score))
+
+
 
