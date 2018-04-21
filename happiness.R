@@ -43,9 +43,9 @@ print(is.na(h_2017$Region))
 
 
 # check if there's any missing data
-missmap(h_2017, main = "Missing data for 2017", col = c('red', 'black'), legend = FALSE)
-missmap(h_2016, main = "Missing data for 2016", col = c('red', 'black'), legend = FALSE)
-missmap(h_2015, main = "Missing data for 2015", col = c('red', 'black'), legend = FALSE)
+# missmap(h_2017, main = "Missing data for 2017", col = c('red', 'black'), legend = FALSE)
+# missmap(h_2016, main = "Missing data for 2016", col = c('red', 'black'), legend = FALSE)
+# missmap(h_2015, main = "Missing data for 2015", col = c('red', 'black'), legend = FALSE)
 
 # looks like we're good to go!
 hap <- rbind(h_2015, h_2016, h_2017)
@@ -95,3 +95,25 @@ ggplot(data = h_2015, aes(x = Happiness.Score,
   geom_point(data = mean_hap_health, aes(colour = Region, size = Country), show.legend = FALSE) +
   theme_few() + 
   theme(legend.title = element_blank())
+
+# how happiness scores change over time
+mean_world_changes <- hap %>%
+  group_by(year) %>%
+  summarise(Happiness.Score = mean(Happiness.Score),
+            Happiness.Label = round(Happiness.Score, 3))
+
+ggplot(data = mean_world_changes, aes(x = year, y = Happiness.Score, label = Happiness.Label)) +
+  geom_bar(stat = "identity", aes(fill = factor(year)), show.legend = FALSE) +
+  scale_y_continuous(limits = c(0, 6)) +
+  geom_text(nudge_y = 0.2) +
+  theme_few() +
+  labs(title = "The world is getting sadder :(",
+       x = "",
+       y = "Mean happiness score")
+
+mean_country_changes <- hap %>%
+  group_by(Country) %>%
+  summarise(Happiness.Score.Diff = sum(diff(Happiness.Score)),
+            Happiness.Score.Improved = ifelse(Happiness.Score.Diff > 0, 1, 0),
+            Happiness.Score = mean(Happiness.Score))
+
