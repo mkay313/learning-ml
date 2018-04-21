@@ -129,9 +129,7 @@ ggplot(data = mean_region_changes, aes(x = Region, y = Happiness.Score)) +
 
 mean_country_changes <- hap %>%
   group_by(Country) %>%
-  summarise(Happiness.Score.Diff = sum(diff(Happiness.Score)),
-            Happiness.Score.Improved = ifelse(Happiness.Score.Diff > 0, 1, 0),
-            Happiness.Score = mean(Happiness.Score))
+  summarise(Happiness.Score.Improved = ifelse(sum(diff(Happiness.Score)) > 0, 1, 0),
+            Mean.Happiness.Score = mean(Happiness.Score))
 
-
-
+# plot onto world map: green (improved score) or blue (decreased score), mean happiness scores on the country if possible
