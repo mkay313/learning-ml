@@ -133,3 +133,4 @@ mean_country_changes <- hap %>%
             Mean.Happiness.Score = mean(Happiness.Score))
 
 # plot onto world map: green (improved score) or blue (decreased score), mean happiness scores on the country if possible
+# rworldmap package
