@@ -22,7 +22,7 @@ h_2016 <- h_2016 %>%
 h_2017 <- h_2017 %>%
   select(-c(Whisker.high, Whisker.low))
 
-# 2017 is missing the regions -- lets add them
+# 2017 is missing some regions -- lets add them
 h_2017$Region <- h_2015[match(h_2017$Country, h_2015$Country), "Region"]
 
 # there are some NAs, lets address that
@@ -156,6 +156,6 @@ ggplot() +
                                                   fill = happiness),
            show.legend = FALSE) +
   scale_fill_gradientn(colours = c("blue", "green")) +
-  labs(title = "Blue countries got less happy over time, while green countries improve. (Grey = no data)") +
+  labs(title = "Blue countries got less happy over time, while green countries have improved. (Grey = no data)") +
   coord_equal() +
   theme_few()
