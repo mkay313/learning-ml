@@ -133,6 +133,12 @@ mean_country_changes <- hap %>%
   summarise(Happiness.Score.Improved = ifelse(sum(diff(Happiness.Score)) > 0, 1, 0),
             Mean.Happiness.Score = mean(Happiness.Score))
 
+country_changes_count <- mean_country_changes %>%
+  group_by(Happiness.Score.Improved) %>%
+  count()
+print(paste("Happier countries total: ", country_changes_count$n[country_changes_count$Happiness.Score.Improved==1]), collapse = " ")
+print(paste("Less happy countries total: ", country_changes_count$n[country_changes_count$Happiness.Score.Improved==0]), collapse = " ")
+
 # there's some missing data -- let's fix this so the biggest missing countries are displayed
 missing <- map_world$region[is.na(map_world$happiness)]
 missing_df <- data.frame(missing=missing) %>%
