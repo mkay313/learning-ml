@@ -1,6 +1,7 @@
 library(tidyverse)
 library(Amelia)
 library(ggthemes)
+library(rworldmap)
 
 # data source: https://www.kaggle.com/unsdsn/world-happiness
 
@@ -132,5 +133,29 @@ mean_country_changes <- hap %>%
   summarise(Happiness.Score.Improved = ifelse(sum(diff(Happiness.Score)) > 0, 1, 0),
             Mean.Happiness.Score = mean(Happiness.Score))
 
-# plot onto world map: green (improved score) or blue (decreased score), mean happiness scores on the country if possible
-# rworldmap package
+# there's some missing data -- let's fix this so the biggest missing countries are displayed
+missing <- map_world$region[is.na(map_world$happiness)]
+missing_df <- data.frame(missing=missing) %>%
+  group_by(missing) %>%
+  count() %>%
+  arrange(desc(n))
+print(missing_df)
+
+mean_country_changes$Country <- as.character(mean_country_changes$Country)
+mean_country_changes <- data.frame(mean_country_changes)
+
+mean_country_changes$Country[150] <- "UK"
+mean_country_changes$Country[151] <- "USA"
+
+map_world <- map_data(map = "world")
+map_world$happiness <- mean_country_changes[match(map_world$region, mean_country_changes$Country), "Happiness.Score.Improved"]
+ggplot() +
+  geom_map(data = map_world, map = map_world, aes(map_id = region,
+                                                  x = long,
+                                                  y = lat,
+                                                  fill = happiness),
+           show.legend = FALSE) +
+  scale_fill_gradientn(colours = c("blue", "green")) +
+  labs(title = "Blue countries got less happy over time, while green countries improve. (Grey = no data)") +
+  coord_equal() +
+  theme_few()
