@@ -39,4 +39,5 @@ salaries_grouped <- salaries %>% group_by(JobTitle, EmployeeName, Year) %>% coun
 nrow(salaries_grouped)
 nrow(salaries_grouped[salaries_grouped$n > 1, ])
 
-# 559 out of 148072 people have more than 1 job... that's not too bad. How about we merge them into single year records?
+# How about we merge those people into single year records?
+salaries_aggregated <- aggregate(TotalPayBenefits ~ JobTitle + EmployeeName + Year, data = salaries, FUN = sum)
