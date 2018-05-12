@@ -20,12 +20,56 @@ for (i in 1:kategorie_ile) {
   wykonawcy_w_kategorii_page <- podstrona %>%
     html_nodes("a") %>%
     html_attr("href")
-  wykonawcy_w_kategorii_page <- wykonawcy_w_kategorii_page[sapply(wykonawcy_w_kategorii_page, function(x) grepl("https://fixly.pl/profil/",x)) == TRUE]
-  wykonawcy_wg_kategorii[[i]] <- map_chr(wykonawcy_w_kategorii_page, function(x) gsub("#feedback", "", x))
+  wykonawcy_w_kategorii_page <- wykonawcy_w_kategorii_page[sapply(wykonawcy_w_kategorii_page, function(x) grepl("https://fixly.pl/profil/",x)) == TRUE] %>%
+    map_chr(function(x) gsub("#feedback", "", x))
+  wykonawcy_wg_kategorii[[i]] <- data.frame(wykonawca_link = wykonawcy_w_kategorii_page, kategoria = kategorie_nazwy[i])
   Sys.sleep(sample(seq(0.1,1,0.1),1))
 }
 
-# przeorganizujmy trochę dane, żeby atrybuty wykonawców były podelementami wykonawców jako elementów naszej głównej listy danych
-# możemy śmiało odlistować wszystkie dane -- pozyskamy potem informację o wszystkich miejscach, w których znajduje się wykładowca
-# samo info, na której kategorii znaleźliśmy danego wykonawcę też zapiszemy -- może coś nam powie jak są wybierani wykonawcy pokazywani na podstronach?
+wykonawcy_i_kategorie_df <- bind_rows(wykonawcy_wg_kategorii)
+wykonawcy_i_kategorie_df$wykonawca_nazwa <- map_chr(wykonawcy_i_kategorie_df$wykonawca, function(x) gsub("https://fixly.pl/profil/", "", x))
 
+print(
+  wykonawcy_i_kategorie_df %>%
+    group_by(wykonawca_nazwa) %>%
+    count() %>%
+    arrange(desc(n))
+)
+wykonawcy <- unique(wykonawcy_i_kategorie_df$wykonawca_link)
+wykonawca_ile <- length(wykonawcy)
+
+wyscrapuj_po_xpath <- function(podstrona, xpath) {
+  return(podstrona %>% html_nodes(xpath=xpath))
+}
+
+# teraz trzeba by wyciągnąć dane o każdym wykonawcy
+wykonawcy_opinie <- vector(mode = "list", length = wykonawca_ile)
+for(i in 1:wykonawca_ile) {
+  podstrona <- read_html(wykonawcy[i])
+  liczba_gwiazdek <- wyscrapuj_po_xpath(podstrona, '//*[contains(concat( " ", @class, " " ), concat( " ", "fa-star", " " ))]') %>%
+    length()
+  feedback_kiedy <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona, 
+                                                                      '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__reviews-time", " " ))]'), 
+                           simplify = FALSE)$doc
+  feedback_kiedy <- feedback_kiedy %>%
+    html_text() %>%
+    str_replace_all("\n", "") %>%
+    trimws(which = "both")
+  
+  feedback_kto_co <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona, 
+                                                                       '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__reviews-data-wrapper", " " ))]'),
+                            simplify = FALSE)$doc
+  feedback <- feedback_kto_co %>%
+    html_nodes('p') %>%
+    html_text() %>%
+    str_replace_all("\n", "") %>%
+    trimws(which="both") %>%
+    matrix(ncol = 2, byrow = TRUE) %>%
+    data.frame()
+  colnames(feedback) <- c("klient", "opinia")
+  feedback$data <- feedback_kiedy
+  wykonawcy_opinie[[i]] <- feedback
+  Sys.sleep(sample(seq(0.1,1,0.1),1))
+}
+
+names(wykonawcy_opinie) <- wykonawcy
