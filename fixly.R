@@ -42,9 +42,18 @@ wyscrapuj_po_xpath <- function(podstrona, xpath) {
   return(podstrona %>% html_nodes(xpath=xpath))
 }
 
+czy_url_dziala <- function(url){
+  tryCatch(
+    identical(status_code(HEAD(url)),200L), 
+    error = function(e){
+      FALSE
+    })
+}
+
 # teraz trzeba by wyciągnąć dane o każdym wykonawcy
 wykonawcy_opinie <- vector(mode = "list", length = wykonawca_ile)
 for(i in 1:wykonawca_ile) {
+  if(!czy_url_dziala(wykonawcy[i])) { next }
   podstrona <- read_html(wykonawcy[i])
   liczba_gwiazdek <- wyscrapuj_po_xpath(podstrona, '//*[contains(concat( " ", @class, " " ), concat( " ", "fa-star", " " ))]') %>%
     length()
