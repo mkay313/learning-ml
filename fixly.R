@@ -88,11 +88,11 @@ for(i in 1:wykonawca_ile) {
   feedback$data <- feedback_kiedy
   feedback <- subset(feedback, select=-c(klient)) # upuszczamy kolumnę identyfikującą klientów -- łatwiej było ściągnąć te dane niż nie ze względu na układ strony, ale nie będziemy ich potrzebować
   
-  wykonawcy_kategorie_na_profilu <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona,
+  liczba_kategorii_na_profilu <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona,
                                                                       '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__to-category", " " ))]'),
                            simplify = FALSE)$doc %>%
     html_text() %>%
-    trimws(which = "both")
+    length()
   
   wykonawcy_opis_na_profilu <- wyscrapuj_po_xpath(podstrona,
                                                   '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__details", " " ))]') %>%
@@ -100,8 +100,8 @@ for(i in 1:wykonawca_ile) {
     str_replace_all("\n|\r", "") %>%
     trimws(which = "both")
   
-  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, lokalizacja, wykonawcy_opis_na_profilu, wykonawcy_kategorie_na_profilu)
-  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Lokalizacja", "Opis_na_profilu", "Kategorie_na_profilu")
+  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, lokalizacja, wykonawcy_opis_na_profilu, liczba_kategorii_na_profilu)
+  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Lokalizacja", "Opis_na_profilu", "Liczba_kategorii")
   
   Sys.sleep(sample(seq(0.1,1,0.1),1))
 }
