@@ -51,9 +51,12 @@ czy_url_dziala <- function(url){
 }
 
 # teraz trzeba by wyciągnąć dane o każdym wykonawcy
-wykonawcy_opinie <- vector(mode = "list", length = wykonawca_ile)
+wykonawcy_profil<- vector(mode = "list", length = wykonawca_ile)
+
 for(i in 1:wykonawca_ile) {
-  if(!czy_url_dziala(wykonawcy[i])) { next }
+  if(!czy_url_dziala(wykonawcy[i])) { 
+    wykonawcy_profil[[i]] <- "NA"
+    next }
   podstrona <- read_html(wykonawcy[i])
   liczba_gwiazdek <- wyscrapuj_po_xpath(podstrona, '//*[contains(concat( " ", @class, " " ), concat( " ", "fa-star", " " ))]') %>%
     length()
@@ -77,8 +80,24 @@ for(i in 1:wykonawca_ile) {
     data.frame()
   colnames(feedback) <- c("klient", "opinia")
   feedback$data <- feedback_kiedy
-  wykonawcy_opinie[[i]] <- feedback
+  feedback <- subset(feedback, select=-c(klient)) # upuszczamy kolumnę identyfikującą klientów -- łatwiej było ściągnąć te dane niż nie ze względu na układ strony, ale nie będziemy ich potrzebować
+  
+  wykonawcy_kategorie_na_profilu <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona,
+                                                                      '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__to-category", " " ))]'),
+                           simplify = FALSE)$doc %>%
+    html_text() %>%
+    trimws(which = "both")
+  
+  wykonawcy_opis_na_profilu <- wyscrapuj_po_xpath(podstrona,
+                                                  '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__details", " " ))]') %>%
+    html_text() %>%
+    str_replace_all("\n|\r", "") %>%
+    trimws(which = "both")
+  
+  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, wykonawcy_opis_na_profilu, wykonawcy_kategorie_na_profilu)
+  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Opis_na_profilu", "Kategorie_na_profilu")
+  
   Sys.sleep(sample(seq(0.1,1,0.1),1))
 }
 
-names(wykonawcy_opinie) <- wykonawcy
+names(wykonawcy_profil) <- wykonawcy
