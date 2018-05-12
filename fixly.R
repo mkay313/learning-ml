@@ -57,9 +57,15 @@ for(i in 1:wykonawca_ile) {
   if(!czy_url_dziala(wykonawcy[i])) { 
     wykonawcy_profil[[i]] <- "NA"
     next }
+  
   podstrona <- read_html(wykonawcy[i])
+  
   liczba_gwiazdek <- wyscrapuj_po_xpath(podstrona, '//*[contains(concat( " ", @class, " " ), concat( " ", "fa-star", " " ))]') %>%
     length()
+  lokalizacja <- wyscrapuj_po_xpath(podstrona, '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__address", " " ))]') %>%
+    html_text() %>%
+    str_replace_all("\n", "") %>%
+    trimws(which="both")
   feedback_kiedy <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona, 
                                                                       '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__reviews-time", " " ))]'), 
                            simplify = FALSE)$doc
@@ -94,8 +100,8 @@ for(i in 1:wykonawca_ile) {
     str_replace_all("\n|\r", "") %>%
     trimws(which = "both")
   
-  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, wykonawcy_opis_na_profilu, wykonawcy_kategorie_na_profilu)
-  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Opis_na_profilu", "Kategorie_na_profilu")
+  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, lokalizacja, wykonawcy_opis_na_profilu, wykonawcy_kategorie_na_profilu)
+  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Lokalizacja", "Opis_na_profilu", "Kategorie_na_profilu")
   
   Sys.sleep(sample(seq(0.1,1,0.1),1))
 }
