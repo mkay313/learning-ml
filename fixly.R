@@ -50,12 +50,16 @@ czy_url_dziala <- function(url){
     })
 }
 
+czy_jest_puste <- function(value) {
+  return(ifelse(identical(value,character(0)),"NA", value))
+}
+
 # teraz trzeba by wyciągnąć dane o każdym wykonawcy
-wykonawcy_profil<- vector(mode = "list", length = wykonawca_ile)
+wykonawcy_opis<- vector(mode = "list", length = wykonawca_ile)
 
 for(i in 1:wykonawca_ile) {
   if(!czy_url_dziala(wykonawcy[i])) { 
-    wykonawcy_profil[[i]] <- "NA"
+    wykonawcy_feedback[[i]] <- "NA"
     next }
   
   podstrona <- read_html(wykonawcy[i])
@@ -66,28 +70,7 @@ for(i in 1:wykonawca_ile) {
     html_text() %>%
     str_replace_all("\n", "") %>%
     trimws(which="both")
-  feedback_kiedy <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona, 
-                                                                      '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__reviews-time", " " ))]'), 
-                           simplify = FALSE)$doc
-  feedback_kiedy <- feedback_kiedy %>%
-    html_text() %>%
-    str_replace_all("\n", "") %>%
-    trimws(which = "both")
-  
-  feedback_kto_co <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona, 
-                                                                       '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__reviews-data-wrapper", " " ))]'),
-                            simplify = FALSE)$doc
-  feedback <- feedback_kto_co %>%
-    html_nodes('p') %>%
-    html_text() %>%
-    str_replace_all("\n", "") %>%
-    trimws(which="both") %>%
-    matrix(ncol = 2, byrow = TRUE) %>%
-    data.frame()
-  colnames(feedback) <- c("klient", "opinia")
-  feedback$data <- feedback_kiedy
-  feedback <- subset(feedback, select=-c(klient)) # upuszczamy kolumnę identyfikującą klientów -- łatwiej było ściągnąć te dane niż nie ze względu na układ strony, ale nie będziemy ich potrzebować
-  
+
   liczba_kategorii_na_profilu <- sapply(podstrona, function (x) wyscrapuj_po_xpath(podstrona,
                                                                       '//*[contains(concat( " ", @class, " " ), concat( " ", "publicProfile__to-category", " " ))]'),
                            simplify = FALSE)$doc %>%
@@ -100,10 +83,19 @@ for(i in 1:wykonawca_ile) {
     str_replace_all("\n|\r", "") %>%
     trimws(which = "both")
   
-  wykonawcy_profil[[i]] <- list(feedback, liczba_gwiazdek, lokalizacja, wykonawcy_opis_na_profilu, liczba_kategorii_na_profilu)
-  names(wykonawcy_profil[[i]]) <- c("Feedback", "Ocena_srednia", "Lokalizacja", "Opis_na_profilu", "Liczba_kategorii")
+  liczba_gwiazdek <- czy_jest_puste(liczba_gwiazdek)
+  wykonawcy_opis_na_profilu <- czy_jest_puste(wykonawcy_opis_na_profilu)
+  liczba_kategorii_na_profilu <- czy_jest_puste(liczba_kategorii_na_profilu)
+  lokalizacja <- czy_jest_puste(lokalizacja)
   
+  opis <- data.frame(Wykonawca = wykonawcy[i], 
+                     Liczba_gwiazdek = liczba_gwiazdek, 
+                     Opis_na_profilu = wykonawcy_opis_na_profilu, 
+                     Liczba_kategorii = liczba_kategorii_na_profilu,
+                     Lokalizacja = lokalizacja)
+  wykonawcy_opis[[i]] <- opis
+
   Sys.sleep(sample(seq(0.1,1,0.1),1))
 }
 
-names(wykonawcy_profil) <- wykonawcy
+wykonawcy_opis_df <- bind_rows(wykonawcy_opis)
