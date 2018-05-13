@@ -28,6 +28,7 @@ for (i in 1:kategorie_ile) {
 
 wykonawcy_i_kategorie_df <- bind_rows(wykonawcy_wg_kategorii)
 wykonawcy_i_kategorie_df$wykonawca_nazwa <- map_chr(wykonawcy_i_kategorie_df$wykonawca, function(x) gsub("https://fixly.pl/profil/", "", x))
+wykonawcy_i_kategorie_df <- unique(wykonawcy_i_kategorie_df)
 
 print(
   wykonawcy_i_kategorie_df %>%
@@ -99,3 +100,7 @@ for(i in 1:wykonawca_ile) {
 }
 
 wykonawcy_opis_df <- bind_rows(wykonawcy_opis)
+wykonawcy_grupowani <- wykonawcy_i_kategorie_df %>%
+  group_by(wykonawca_link) %>%
+  count()
+wykonawcy_polaczeni <- merge(wykonawcy_opis_df, wykonawcy_grupowani, by.x="Wykonawca", by.y="wykonawca_link")
