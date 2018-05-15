@@ -3,7 +3,7 @@ library(plotrix) #rescale
 library(ggmap) #google maps api --  do pozyskania danych o lokalizacji
 #source("fixly.R")
 
-wykonawcy$Wykonawca <- map_chr(wykonawcy$Wykonawca, function(x) gsub("https://fixly.pl/profil/", "", x))
+wykonawcy_polaczeni$Wykonawca <- map_chr(wykonawcy$Wykonawca, function(x) gsub("https://fixly.pl/profil/", "", x))
 print(head(wykonawcy_polaczeni %>% arrange(desc(n))))
 print(head(wykonawcy_polaczeni %>% arrange(desc(Liczba_kategorii))))
 

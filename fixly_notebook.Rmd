@@ -9,6 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 library(knitr)
+library(kableExtra)
 library(tidyverse)
 library(plotrix)
 library(ggmap)
@@ -18,7 +19,7 @@ library(wordcloud)
 
 ## Pozyskiwanie danych
 
-Dane zostały pobrane z serwisu Fixly przez zescrapowanie stron z kategoriami. Na każdej stronie z kategoriami wyświetlanych jest kilka opinii o kontrahentach, którzy akurat w tej kategorii się znadują. Stamtąd można już było dostać się do kontrahentów. Trochę czyszczenia, łączenia i udało się zebrać informacje: link do profilu wykonawcy; liczba gwiazdek (czyli średnia ocena); opis na profilu (nieobowiązkowy); liczbę kategorii, w których ogłasza się wykonawca; liczbę kategorii, w których wykonawca ma wyświetlaną opinię "promującą"; oraz lokalizację. Skrypty (do pobierania danych oraz późniejszej obróbki i wizualizacji) można podejrzeć **[tu]**(https://github.com/mkay313/learning-ml/blob/master/fixly.R).
+Dane zostały pobrane z serwisu Fixly przez zescrapowanie stron z kategoriami. Na każdej stronie z kategoriami wyświetlanych jest kilka opinii o kontrahentach, którzy akurat w tej kategorii się znadują. Stamtąd można już było dostać się do kontrahentów. Trochę czyszczenia, łączenia i udało się zebrać informacje: link do profilu wykonawcy; liczba gwiazdek (czyli średnia ocena); opis na profilu (nieobowiązkowy); liczbę kategorii, w których ogłasza się wykonawca; liczbę kategorii, w których wykonawca ma wyświetlaną opinię "promującą"; oraz lokalizację. Skrypty (do pobierania danych oraz późniejszej obróbki i wizualizacji) można podejrzeć [tu](https://github.com/mkay313/learning-ml/blob/master/fixly.R) oraz [tu](https://github.com/mkay313/learning-ml/blob/master/fixly_visualisation.R).
 
 ## Dane
 
@@ -37,7 +38,10 @@ kable(head(wykonawcy %>%
              select(Wykonawca, Liczba_kategorii_z_opinia) %>% 
              arrange(desc(Liczba_kategorii_z_opinia)) %>%
              `colnames<-`(c("Wykonawca", "Promowane kategorie")), n=5), 
-      caption="Tabela wykonawców: top 5 wykonawców z największą liczbą 'promujących' opinii na stronach kategorii.")
+      caption="Tabela wykonawców: top 5 wykonawców z największą liczbą 'promujących' opinii na stronach kategorii.", 
+      format = "latex", booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"),
+                full_width = TRUE)
 ```
 
 
@@ -69,7 +73,9 @@ Drugą tabelą w naszej analizie są miasta.
 kable(head(miasta %>% 
              arrange(desc(Freq)) %>%
              `colnames<-`(c("Miasto", "Wykonawców ogółem", "Wsp. frekwencji", "Długość geogr.", "Szerokość geogr.")), n=5),
-      caption="Tabela miasta: top 5 miast z największą liczbą wykonawców.")
+      caption="Tabela miasta: top 5 miast z największą liczbą wykonawców.",
+      format="latex", booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"))
 ```
 
 Najwięcej wykonawców w naszej próbie jest z Warszawy, pozostali w top 5 również są z dużych miast. Ma to sens -- im większe miasto i im więcej mieszkańców, tym więcej kontrahentów. Ciekawe, że w naszej 5 nie znalazła się np. Łódź -- może to kwestia braku zapotrzebowania, może braku specjalistów (wszyscy wyjechali do Warszawy :)), a może braków marketingowych (mało kto w Łodzi wie o Fixly?).
@@ -80,7 +86,9 @@ kable(head(wykonawcy %>%
              mutate(Opinie_do_kategorii=Liczba_kategorii_z_opinia/Liczba_kategorii) %>%
              arrange(desc(Opinie_do_kategorii)) %>%
              `colnames<-`(c("Wykonawca", "Liczba kategorii na profilu", "Promowane kategorie", "Wsp. kategorii")), n=10), 
-      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć.")
+      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć.",
+      format="latex", booktabs=TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"))
 ```
 
 Ups. No i tu nasz wskaźnik ma mały problem, ponieważ albo próbujemy dzielić przez zero (ktoś usunął konto i nie ma już jego kategorii, ale opinie ciągle gdzieś wiszą) i R zwraca nam Inf, albo znów ktoś manipulował przy swoich kategoriach i została mu opinia w kategorii, którą się nie zajmuje. Pozbądźmy się takich przypadków w takim razie.
@@ -92,7 +100,9 @@ kable(head(wykonawcy %>%
              filter(Opinie_do_kategorii<=1) %>%
              arrange(desc(Opinie_do_kategorii)) %>%
              `colnames<-`(c("Wykonawca", "Liczba kategorii na profilu", "Promowane kategorie", "Wsp. kategorii")), n=10), 
-      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć. 10 najlepszych wyników")
+      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć. 10 najlepszych wyników",
+      format="latex", booktabs=TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"))
 ```
 
 Teraz jest tylko odrobinę lepiej -- pozbyliśmy się błędów, ale teraz będziemy mieć sporo "jedynek", czyli osób z jedną kategorią i jednym 'promowaniem'. Zobaczmy, co się dzieje, gdy wymusimy większą liczbę kategorii.
@@ -103,7 +113,9 @@ kable(head(wykonawcy %>%
              mutate(Opinie_do_kategorii=Liczba_kategorii_z_opinia/Liczba_kategorii) %>%
              arrange(desc(Opinie_do_kategorii)) %>%
              `colnames<-`(c("Wykonawca", "Liczba kategorii na profilu", "Promowane kategorie", "Wsp. kategorii")), n=10), 
-      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć. 10 najlepszych wyników.")
+      caption="Liczba kategorii, w których wykonawca jest 'promowany' opinią a liczba kategorii ogółem, w których można go znaleźć. 10 najlepszych wyników.",
+      format = "latex", booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position"))
 ```
 
 Teraz lepiej. Jak widać, prym wiedzie Poznaniak ;)
@@ -160,7 +172,9 @@ ggplot() +
 Poza oczywistościami (Warszawa, Kraków, Wrocław, Poznań, Gdańsk) mamy ciekawostki -- np. Łódź jest porównywalna do Szczecina i Bydgoszczy, Bydgoszcz ma więcej wykonawców niż Toruń, a na wschodzie Polski nie ma zbyt wielu wykonawców.
 
 O czym piszą na swoich profilach wykonawcy?
-``` {r wordcloud, echo=FALSE, message=FALSE}
+
+
+``` {r wordcloud, echo=FALSE, message=FALSE, warning=FALSE}
 data("stopwords_pl")
 opisy <- strsplit(paste(wykonawcy$Opis_na_profilu[!is.na(wykonawcy$Opis_na_profilu)], collapse = " "), split = " ")[[1]] %>%
   str_replace_all("[^[:alpha:]]", "") %>%
@@ -171,5 +185,6 @@ opisy_df <- data.frame(tekst = opisy) %>%
   filter(!tekst %in% stopwords_pl)
 wordcloud(opisy_df$tekst, opisy_df$n, scale=c(4,0.5), min.freq=10, max.words=50, colors=brewer.pal(8, "Dark2"))
 ```
+
 
 Nie jest niespodzianką, że opis na profilu mówi głównie o tym, jakich usług podejmuje się wykonawca.
