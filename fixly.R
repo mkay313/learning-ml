@@ -60,7 +60,6 @@ wykonawcy_opis<- vector(mode = "list", length = wykonawca_ile)
 
 for(i in 1:wykonawca_ile) {
   if(!czy_url_dziala(wykonawcy[i])) { 
-    wykonawcy_feedback[[i]] <- "NA"
     next }
   
   podstrona <- read_html(wykonawcy[i])
@@ -103,4 +102,6 @@ wykonawcy_opis_df <- bind_rows(wykonawcy_opis)
 wykonawcy_grupowani <- wykonawcy_i_kategorie_df %>%
   group_by(wykonawca_link) %>%
   count()
+names(wykonawcy_grupowani)[(names(wykonawcy_grupowani)) =="n"] <- "Liczba_kategorii_z_opinia"
 wykonawcy_polaczeni <- merge(wykonawcy_opis_df, wykonawcy_grupowani, by.x="Wykonawca", by.y="wykonawca_link")
+write_csv(wykonawcy_polaczeni, "wykonawcy.csv")

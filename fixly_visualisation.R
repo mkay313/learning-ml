@@ -3,14 +3,15 @@ library(plotrix) #rescale
 library(ggmap) #google maps api --  do pozyskania danych o lokalizacji
 #source("fixly.R")
 
+wykonawcy$Wykonawca <- map_chr(wykonawcy$Wykonawca, function(x) gsub("https://fixly.pl/profil/", "", x))
 print(head(wykonawcy_polaczeni %>% arrange(desc(n))))
 print(head(wykonawcy_polaczeni %>% arrange(desc(Liczba_kategorii))))
 
 # wprowadźmy wskaźnik liczby kategorii, w których mamy podpiętą opinię do ogólnej deklarowanej liczby kategorii -- im wyższa wartość, tym lepiej:
 # (jeśli konto zostało usunięte, to możemy mieć wartość inf -- przy dalszej analizie trzeba się tym potencjalnie zająć, żeby móc pokazać wykres)
-wykonawcy_polaczeni <- wykonawcy_polaczeni %>% 
+print(wykonawcy_polaczeni %>% 
              mutate(Opinie_do_kategorii=n/Liczba_kategorii) %>%
-             arrange(desc(Opinie_do_kategorii))
+             arrange(desc(Opinie_do_kategorii)))
 
 print(head(wykonawcy_polaczeni %>% filter(Liczba_kategorii>5), n=10))
 
@@ -24,7 +25,6 @@ ggplot(data = wykonawcy_polaczeni, aes(x=Liczba_kategorii, y=n)) +
 
 print(wykonawcy_polaczeni %>% group_by(Lokalizacja) %>% count() %>% arrange(desc(nn)))
 
-mapa <- map_data("world") %>% filter(region == "Poland")
 miasta <- wykonawcy_polaczeni$Lokalizacja[wykonawcy_polaczeni$Lokalizacja != "NA"]
 miasta <- as.data.frame(table(miasta))
 miasta$wsp_frekwencji <- rescale(miasta$Freq, c(1,10))
@@ -40,6 +40,9 @@ while(any(is.na(miasta$lon))) {
       miasta$lat[i] <- lonlat$lat
       Sys.sleep(1)}}}
 
+write_csv(miasta, "miasta.csv")
+
+mapa <- map_data("world") %>% filter(region == "Poland")
 ggplot() + 
   geom_polygon(data = mapa, aes(long, lat), color = "black", fill = "white") + 
   geom_point(data = miasta, aes(lon,lat, size=Freq), color = "blue", alpha = 0.5, show.legend = FALSE) + 
