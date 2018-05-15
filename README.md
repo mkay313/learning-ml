@@ -20,4 +20,4 @@ creating a k-nearest neighbours model off the iris flowers dataset with the goal
 exploratory data analysis and practicing plotting off the [World Happiness Report dataset](https://www.kaggle.com/unsdsn/world-happiness) with the goal of, well, practicing generating nice plots :)
 
 ### fixly
-exploratory data analysis, practicing plotting, and getting acquainted with RMarkdown and knitr (which is...neat *ba-doom-tss*) -- data scraped off Fixly.pl, freelancer.com for builders and other _real-life_ specialists
+exploratory data analysis, practicing plotting, and getting acquainted with RMarkdown and knitr (which is...neat *ba-doom-tss*) -- data scraped off [Fixly.pl](https://www.fixly.pl), a freelancer.com for builders and other _real-life_ specialists
